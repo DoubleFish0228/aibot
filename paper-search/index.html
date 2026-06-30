@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PaperFinder — 智能论文检索</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- ====== 导航栏 ====== -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a class="logo" href="#">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          <line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/>
+        </svg>
+        <span>PaperFinder</span>
+      </a>
+
+      <div class="nav-actions">
+        <div class="connection-dot" id="connDot" title="未连接">
+          <span class="dot"></span>
+          <span class="conn-text" id="connLabel">未连接</span>
+        </div>
+        <button class="btn-ghost" id="btnSettings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          设置
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ====== 设置抽屉 ====== -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-head">
+      <h3>DeepSeek API 配置</h3>
+      <button class="btn-close-drawer" id="btnCloseDrawer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="field">
+        <label>API 基础 URL</label>
+        <input type="text" id="apiBase" value="https://api.deepseek.com/v1">
+        <span class="field-hint">DeepSeek 兼容 OpenAI 格式</span>
+      </div>
+      <div class="field">
+        <label>API Key</label>
+        <div class="input-wrap">
+          <input type="password" id="apiKey" placeholder="sk-...">
+          <button class="btn-eye" id="toggleKey">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>模型</label>
+        <select id="modelSelect" class="select-field">
+          <option value="deepseek-chat">deepseek-chat</option>
+          <option value="deepseek-reasoner">deepseek-reasoner</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <span>结果数量</span>
+        <div class="range-wrap">
+          <input type="range" id="resultCount" min="1" max="15" value="5">
+          <span class="range-v" id="resultCountValue">5</span>
+        </div>
+      </div>
+
+      <button class="btn-connect" id="btnConnect">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        测试连接
+      </button>
+      <div class="conn-msg" id="connectStatus"></div>
+
+      <div class="drawer-section">
+        <h4>搜索领域</h4>
+        <div class="checkbox-group" id="domainCheckboxes">
+          <label class="check-row"><input type="checkbox" value="cs" checked><span class="check-label">计算机科学</span></label>
+          <label class="check-row"><input type="checkbox" value="ai" checked><span class="check-label">人工智能</span></label>
+          <label class="check-row"><input type="checkbox" value="math"><span class="check-label">数学</span></label>
+          <label class="check-row"><input type="checkbox" value="physics"><span class="check-label">物理学</span></label>
+          <label class="check-row"><input type="checkbox" value="bio"><span class="check-label">生物学</span></label>
+          <label class="check-row"><input type="checkbox" value="econ"><span class="check-label">经济学</span></label>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ====== 主内容 ====== -->
+  <main class="main">
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+      <div class="hero-glow"></div>
+      <div class="hero-content">
+        <h1>探索学术论文</h1>
+        <p class="hero-sub">基于 DeepSeek 大模型的智能论文检索</p>
+
+        <div class="search-panel" id="searchPanel">
+          <div class="search-row">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" placeholder="输入论文关键词、标题或作者...">
+            <button class="btn-search-main" id="btnSearch" disabled>搜索</button>
+          </div>
+
+          <div class="tags-row" id="searchSuggestions">
+            <span class="tags-label">热门：</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 结果区 -->
+    <section class="results-area" id="resultsArea" style="display:none;">
+      <div class="results-toolbar" id="resultsToolbar" style="display:none;">
+        <div class="results-stats" id="resultsStats"></div>
+        <div class="toolbar-right">
+          <button class="btn-tool" id="btnClear">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            清空
+          </button>
+          <div class="sort-group">
+            <span>排序</span>
+            <select id="sortBy">
+              <option value="year">年份</option>
+              <option value="relevance">相关度</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 加载 -->
+      <div class="loader" id="loadingOverlay" style="display:none;">
+        <div class="loader-pulse"></div>
+        <p id="loadingText">正在检索论文...</p>
+      </div>
+
+      <!-- 卡片列表 -->
+      <div class="cards" id="resultsList"></div>
+
+      <!-- 空状态 -->
+      <div class="empty" id="emptyState">
+        <div class="empty-art">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <rect x="12" y="8" width="56" height="64" rx="4" stroke="#cbd5e1" stroke-width="2"/>
+            <line x1="20" y1="22" x2="60" y2="22" stroke="#e2e8f0" stroke-width="2"/>
+            <line x1="20" y1="32" x2="50" y2="32" stroke="#e2e8f0" stroke-width="2"/>
+            <line x1="20" y1="42" x2="55" y2="42" stroke="#e2e8f0" stroke-width="2"/>
+            <line x1="20" y1="52" x2="45" y2="52" stroke="#e2e8f0" stroke-width="2"/>
+            <circle cx="64" cy="58" r="10" fill="#4f46e5"/>
+            <path d="M60 58l3 3 5-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>准备好检索论文</h3>
+        <p>点击右上角 <strong>设置</strong> 配置 DeepSeek API Key，<br>然后输入关键词即可开始搜索</p>
+      </div>
+
+      <!-- 无结果 -->
+      <div class="empty" id="noResults" style="display:none;">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <line x1="8" y1="11" x2="14" y2="11"/>
+        </svg>
+        <h3>未找到匹配论文</h3>
+        <p>尝试更换关键词或调整搜索领域</p>
+      </div>
+
+      <!-- 分页 -->
+      <div class="pager" id="pagination" style="display:none;"></div>
+    </section>
+  </main>
+
+  <!-- ====== 详情模态框 ====== -->
+  <div class="modal-glass" id="modalOverlay">
+    <div class="modal-card" id="modalCard">
+      <div class="modal-top">
+        <div>
+          <span class="modal-badge" id="modalBadge">论文</span>
+          <h2 id="modalTitle"></h2>
+        </div>
+        <button class="btn-modal-close" id="btnCloseModal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-scroll" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
